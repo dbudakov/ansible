@@ -1,0 +1,37 @@
+- name: "Run setup module for clients"
+  hosts:
+    - clients
+  gather_facts: false
+  become: true
+  vars:
+      ansible_python_interpreter: /usr/bin/python3
+
+  tasks:
+
+    # Gather facts to file
+    - name: "Gather facts"
+      setup:
+
+    - name: Find out what the remote machine's mounts are
+      ansible.builtin.slurp:
+        src: /etc/machine-id
+      register: results
+
+    - name: set facts
+      ansible.builtin.set_fact:
+        machine_id: "{{ results['content'] | b64decode | trim }}"
+
+- name: "Create file for ansible-cmdb"
+  hosts: localhost
+  gather_facts: false
+  become: true
+  vars:
+      ansible_python_interpreter: /usr/bin/python3
+
+  tasks:
+    # - name: Print output to file
+    #   ansible.builtin.copy:
+    #     content: "{{hostvars}}"
+    #     # content: "{{hostvars[item].ansible_facts}}"
+    #     dest: /vagrant/share/out/{{item}}
+    #   loop: "{{ groups['clients'] }}"

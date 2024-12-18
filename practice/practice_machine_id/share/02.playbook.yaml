@@ -1,0 +1,34 @@
+- name: "deploy Router"
+  hosts:
+    - clients
+  gather_facts: false
+  become: true
+  vars:
+      ansible_python_interpreter: /usr/bin/python3
+
+  tasks:
+
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/slurp_module.html
+    - name: Find out what the remote machine's mounts are
+      ansible.builtin.slurp:
+        src: /etc/machine-id
+      register: results
+
+    - name: set facts
+      ansible.builtin.set_fact:
+        machine_id: "{{ results['content'] | b64decode | trim }}"
+
+- name: "Get vars"
+  hosts: localhost
+  gather_facts: false
+  become: true
+  vars:
+      ansible_python_interpreter: /usr/bin/python3
+  tasks:
+    - name: "Pull vars"
+      ansible.builtin.lineinfile:
+        create: true
+        dest: ./out/machine-id_02
+        regexp: "{{ item }}"
+        line: "{{ item }} {{ hostvars[item].machine_id }}"
+      loop: "{{ groups['clients'] }}"

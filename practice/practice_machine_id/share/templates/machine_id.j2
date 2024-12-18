@@ -1,0 +1,3 @@
+{% for my_item in groups['clients'] %}
+{{ my_item }} {{hostvars[my_item].machine_id}}
+{% endfor %}
